@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: database
-        image: redis:6.2
+        image: registry.access.redhat.com/ubi8/redis-6:latest
         ports:
         - containerPort: 6379
         resources:
