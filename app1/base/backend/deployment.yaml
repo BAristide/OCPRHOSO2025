@@ -16,10 +16,10 @@ spec:
     spec:
       containers:
       - name: backend
-        image: clue/json-server:latest
-        args: ["--port", "3000", "/data/db.json"]
+        image: python:3.9-slim
+        command: ["python3", "-m", "http.server", "5001"]
         ports:
-        - containerPort: 3000
+        - containerPort: 5001
         resources:
           limits:
             cpu: "500m"
@@ -27,10 +27,3 @@ spec:
           requests:
             cpu: "200m"
             memory: "256Mi"
-        volumeMounts:
-        - name: json-data
-          mountPath: /data
-      volumes:
-      - name: json-data
-        configMap:
-          name: json-server-data
