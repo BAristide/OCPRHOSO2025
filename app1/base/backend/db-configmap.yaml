@@ -2,20 +2,14 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: json-server-data
-  labels:
-    app: backend
 data:
   db.json: |
     {
       "posts": [
-        { "id": 1, "title": "Sample Post 1", "author": "User1" },
-        { "id": 2, "title": "Sample Post 2", "author": "User2" }
+        { "id": 1, "title": "json-server", "author": "typicode" }
       ],
       "comments": [
-        { "id": 1, "body": "Some comment", "postId": 1 },
-        { "id": 2, "body": "Another comment", "postId": 1 }
+        { "id": 1, "body": "some comment", "postId": 1 }
       ],
-      "profile": {
-        "name": "typicode"
-      }
+      "profile": { "name": "typicode" }
     }
