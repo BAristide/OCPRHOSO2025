@@ -16,13 +16,10 @@ spec:
     spec:
       containers:
       - name: backend
-        image: registry.hub.docker.com/typicode/json-server:latest
-        args: ["--watch", "/data/db.json"]
+        image: clue/json-server:latest
+        args: ["--port", "3000", "/data/db.json"]
         ports:
         - containerPort: 3000
-        volumeMounts:
-        - name: data-volume
-          mountPath: /data
         resources:
           limits:
             cpu: "500m"
@@ -30,7 +27,10 @@ spec:
           requests:
             cpu: "200m"
             memory: "256Mi"
+        volumeMounts:
+        - name: json-data
+          mountPath: /data
       volumes:
-      - name: data-volume
+      - name: json-data
         configMap:
           name: json-server-data
