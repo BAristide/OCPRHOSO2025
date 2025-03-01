@@ -16,33 +16,13 @@ spec:
     spec:
       containers:
       - name: database
-        image: bitnami/postgresql:14
+        image: redis:6.2
         ports:
-        - containerPort: 5432
-        env:
-        - name: POSTGRESQL_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: database-credentials
-              key: username
-        - name: POSTGRESQL_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: database-credentials
-              key: password
-        - name: POSTGRESQL_DATABASE
-          value: "appdb"
-        volumeMounts:
-        - name: database-storage
-          mountPath: /bitnami/postgresql
+        - containerPort: 6379
         resources:
           limits:
-            cpu: "1"
-            memory: "1Gi"
-          requests:
             cpu: "500m"
             memory: "512Mi"
-      volumes:
-      - name: database-storage
-        persistentVolumeClaim:
-          claimName: database-pvc
+          requests:
+            cpu: "200m"
+            memory: "256Mi"
