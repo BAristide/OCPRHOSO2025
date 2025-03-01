@@ -1,16 +1,16 @@
+# app1/base/backend/configmap.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: backend-data
+  name: json-server-data
 data:
   db.json: |
     {
       "posts": [
-        { "id": 1, "title": "Hello World", "author": "John Doe" },
-        { "id": 2, "title": "GitOps Demo", "author": "Jane Doe" }
+        { "id": 1, "title": "json-server", "author": "typicode" }
       ],
       "comments": [
-        { "id": 1, "body": "Great post!", "postId": 1 },
-        { "id": 2, "body": "Nice demo!", "postId": 2 }
-      ]
+        { "id": 1, "body": "some comment", "postId": 1 }
+      ],
+      "profile": { "name": "typicode" }
     }
