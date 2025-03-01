@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: python:3.9-slim
+        image: registry.access.redhat.com/ubi8/python-39:latest
         command: ["python3", "-m", "http.server", "5001"]
         ports:
         - containerPort: 5001
