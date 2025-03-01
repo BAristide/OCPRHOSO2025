@@ -16,9 +16,10 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: quay.io/redhatworkshops/welcome-app:latest
+        image: python:3.9-slim
+        command: ["python3", "-m", "http.server", "5000"]
         ports:
-        - containerPort: 8080
+        - containerPort: 5000
         resources:
           limits:
             cpu: "500m"
