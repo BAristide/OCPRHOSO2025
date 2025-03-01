@@ -9,7 +9,7 @@ spec:
     kind: Service
     name: frontend
   port:
-    targetPort: http
+    targetPort: 5000
   tls:
     termination: edge
     insecureEdgeTerminationPolicy: Redirect
