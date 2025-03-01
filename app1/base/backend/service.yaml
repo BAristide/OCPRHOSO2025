@@ -6,8 +6,8 @@ metadata:
     app: backend
 spec:
   ports:
-  - port: 3000
-    targetPort: 3000
+  - port: 5001
+    targetPort: 5001
     protocol: TCP
   selector:
     app: backend
