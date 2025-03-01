@@ -16,9 +16,9 @@ spec:
     spec:
       containers:
       - name: backend
-        image: quay.io/redhatworkshops/json-server:latest
+        image: clue/json-server:latest
         ports:
-        - containerPort: 3000
+        - containerPort: 80
         resources:
           limits:
             cpu: "500m"
