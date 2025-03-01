@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: database
+  labels:
+    app: database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: database
+  template:
+    metadata:
+      labels:
+        app: database
+    spec:
+      containers:
+      - name: database
+        image: bitnami/postgresql:14
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRESQL_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: database-credentials
+              key: username
+        - name: POSTGRESQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: database-credentials
+              key: password
+        - name: POSTGRESQL_DATABASE
+          value: "appdb"
+        volumeMounts:
+        - name: database-storage
+          mountPath: /bitnami/postgresql
+        resources:
+          limits:
+            cpu: "1"
+            memory: "1Gi"
+          requests:
+            cpu: "500m"
+            memory: "512Mi"
+      volumes:
+      - name: database-storage
+        persistentVolumeClaim:
+          claimName: database-pvc
