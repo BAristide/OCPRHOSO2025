@@ -6,8 +6,8 @@ metadata:
     app: database
 spec:
   ports:
-  - port: 5432
-    targetPort: 5432
+  - port: 6379
+    targetPort: 6379
     protocol: TCP
   selector:
     app: database
