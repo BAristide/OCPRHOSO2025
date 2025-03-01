@@ -1,3 +1,4 @@
+# app1/base/backend/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -28,9 +29,9 @@ spec:
             cpu: "200m"
             memory: "256Mi"
         volumeMounts:
-        - name: backend-data
+        - name: json-data
           mountPath: /data
       volumes:
-      - name: backend-data
+      - name: json-data
         configMap:
-          name: backend-data
+          name: json-server-data
