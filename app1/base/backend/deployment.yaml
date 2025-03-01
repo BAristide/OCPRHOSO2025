@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: typicode/json-server:latest
+        image: clue/json-server:latest
         args: ["/data/db.json"]
         ports:
         - containerPort: 3000
