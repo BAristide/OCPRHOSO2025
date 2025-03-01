@@ -1,4 +1,3 @@
-# app1/base/backend/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -17,10 +16,13 @@ spec:
     spec:
       containers:
       - name: backend
-        image: clue/json-server:latest
-        args: ["/data/db.json"]
+        image: registry.hub.docker.com/typicode/json-server:latest
+        args: ["--watch", "/data/db.json"]
         ports:
         - containerPort: 3000
+        volumeMounts:
+        - name: data-volume
+          mountPath: /data
         resources:
           limits:
             cpu: "500m"
@@ -28,10 +30,7 @@ spec:
           requests:
             cpu: "200m"
             memory: "256Mi"
-        volumeMounts:
-        - name: json-data
-          mountPath: /data
       volumes:
-      - name: json-data
+      - name: data-volume
         configMap:
           name: json-server-data
