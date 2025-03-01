@@ -11,3 +11,6 @@ resources:
 - database/service.yaml
 - database/pvc.yaml
 - database/secret.yaml
+- serviceaccount.yaml
+- role.yaml
+- rolebinding.yaml
