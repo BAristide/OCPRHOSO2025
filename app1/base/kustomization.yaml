@@ -7,6 +7,7 @@ resources:
 - frontend/route.yaml
 - backend/deployment.yaml
 - backend/service.yaml
+- backend/db-configmap.yaml
 - database/deployment.yaml
 - database/service.yaml
 - database/pvc.yaml
