@@ -1,25 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: backend
+  name: database
   labels:
-    app: backend
+    app: database
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
-      app: backend
+      app: database
   template:
     metadata:
       labels:
-        app: backend
+        app: database
     spec:
       containers:
-      - name: backend
-        image: python:3.9-slim
-        command: ["python3", "-m", "http.server", "5001"]
+      - name: database
+        image: redis:6.2
         ports:
-        - containerPort: 5001
+        - containerPort: 6379
         resources:
           limits:
             cpu: "500m"
