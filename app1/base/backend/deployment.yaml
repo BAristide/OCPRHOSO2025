@@ -16,9 +16,10 @@ spec:
     spec:
       containers:
       - name: backend
-        image: clue/json-server:latest
+        image: typicode/json-server:latest
+        args: ["/data/db.json"]
         ports:
-        - containerPort: 80
+        - containerPort: 3000
         resources:
           limits:
             cpu: "500m"
@@ -26,3 +27,10 @@ spec:
           requests:
             cpu: "200m"
             memory: "256Mi"
+        volumeMounts:
+        - name: backend-data
+          mountPath: /data
+      volumes:
+      - name: backend-data
+        configMap:
+          name: backend-data
