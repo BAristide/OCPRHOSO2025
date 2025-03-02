@@ -12,6 +12,7 @@ resources:
 - database/service.yaml
 - database/pvc.yaml
 - database/sealed-secret.yaml
+- database/sealed-secrettest.yaml
 - serviceaccount.yaml
 - role.yaml
 - rolebinding.yaml
