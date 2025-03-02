@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
 - ../../base
+- sealed-secret.yaml
 
 namespace: app1-test
 
