@@ -1,0 +1,198 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name:  openstack-data-plane
+  namespace: openstack
+spec:
+  env:
+    - name: ANSIBLE_FORCE_COLOR
+      value: "True"
+  services:
+    - configure-network
+    - validate-network
+    - install-os
+    - configure-os
+    - run-os
+    - ceph-client
+    - ovn
+    - libvirt
+    - nova-custom-ceph
+    - telemetry
+  networkAttachments:
+    - ctlplane
+  preProvisioned: true
+  baremetalSetTemplate:
+    deploymentSSHSecret: dataplane-ansible-ssh-private-key-secret
+    bmhNamespace: openstack
+    cloudUserName: kni
+    bmhLabelSelector:
+      app: openstack
+    ctlplaneInterface: ens3
+    dnsSearchDomains:
+      - ecintelligence.lab
+  nodeTemplate:
+    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+    extraMounts:
+      - extraVolType: Ceph
+        volumes:
+        - name: ceph
+          secret:
+            secretName: ceph-conf-files
+        mounts:
+        - name: ceph
+          mountPath: "/etc/ceph"
+          readOnly: true
+      - extraVolType: Logs
+        volumes:
+        - name: ansible-logs
+          persistentVolumeClaim:
+            claimName: dataplane-ansible-logs
+        mounts:
+        - name: ansible-logs
+          mountPath: "/runner/artifacts"
+    managementNetwork: ctlplane
+    ansible:
+      ansibleUser: kni
+      ansiblePort: 22
+      ansibleVarsFrom:
+        - prefix: subscription_manager_
+          secretRef:
+            name: subscription-manager
+        - secretRef:
+            name: redhat-registry
+      ansibleVars:
+        edpm_bootstrap_command: |
+          subscription-manager register --username {{ subscription_manager_username }} --password {{ subscription_manager_password }}
+          subscription-manager release --set=9.4
+          subscription-manager repos --disable=*
+          subscription-manager repos --enable=rhel-9-for-x86_64-baseos-eus-rpms --enable=rhel-9-for-x86_64-appstream-eus-rpms --enable=rhel-9-for-x86_64-highavailability-eus-rpms --enable=fast-datapath-for-rhel-9-x86_64-rpms --enable=rhoso-18.0-for-rhel-9-x86_64-rpms --enable=rhceph-7-tools-for-rhel-9-x86_64-rpms
+        edpm_bootstrap_release_version_package: []
+        edpm_network_config_os_net_config_mappings:
+          edpm-compute-0:
+            nic1: 52:54:00:1d:bc:0d
+            nic2: 52:54:00:63:4c:9f
+            nic3: 52:54:00:0c:38:bb
+            nic4: 52:54:00:12:b1:18
+            nic5: 52:54:00:c6:cc:98
+          edpm-compute-1:
+            nic1: 52:54:00:eb:b0:a0
+            nic2: 52:54:00:a4:b9:4a
+            nic3: 52:54:00:ac:cd:11
+            nic4: 52:54:00:bb:cd:00
+            nic5: 52:54:00:39:99:e7
+        edpm_network_config_update: False
+        edpm_network_config_template: |
+          ---
+          {% set mtu_list = [ctlplane_mtu] %}
+          {% for network in nodeset_networks %}
+          {{ mtu_list.append(lookup('vars', networks_lower[network] ~ '_mtu')) }}
+          {%- endfor %}
+          {% set min_viable_mtu = mtu_list | max %}
+          network_config:
+          - type: interface
+            name: nic1
+            mtu: {{ min_viable_mtu }}
+            use_dhcp: false
+            dns_servers: {{ ctlplane_dns_nameservers }}
+            domain: {{ dns_search_domains }}
+            addresses:
+              - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_cidr }}
+            routes: {{ ctlplane_host_routes }}
+          - type: linux_bond
+            name: bond_api
+            use_dhcp: false
+            use_dhcpv6: false
+            bonding_options: "mode=active-backup miimon=100"
+            members:
+              - type: interface
+                name: nic4
+                primary: true
+              - type: interface
+                name: nic5
+          {% for network in nodeset_networks if network not in ['external', 'tenant'] %}
+          - type: vlan
+            mtu: {{ lookup('vars', networks_lower[network] ~ '_mtu') }}
+            vlan_id: {{ lookup('vars', networks_lower[network] ~ '_vlan_id') }}
+            device: bond_api
+            addresses:
+            - ip_netmask: {{ lookup('vars', networks_lower[network] ~ '_ip') }}/{{ lookup('vars', networks_lower[network] ~ '_cidr') }}
+          {% endfor %}
+          - type: ovs_bridge
+            name: br-ex
+            use_dhcp: false
+            use_dhcpv6: false
+            members:
+            - type: linux_bond
+              name: bond_data
+              mtu: {{ min_viable_mtu }}
+              bonding_options: "mode=active-backup miimon=100"
+              members:
+              - type: interface
+                name: nic2
+              - type: interface
+                name: nic3
+            - type: vlan
+              vlan_id: {{ lookup('vars', networks_lower['tenant'] ~ '_vlan_id') }}
+              mtu: {{ lookup('vars', networks_lower['tenant'] ~ '_mtu') }}
+              device: bond_data
+              addresses:
+              - ip_netmask:
+                  {{ lookup('vars', networks_lower['tenant'] ~ '_ip') }}/{{ lookup('vars', networks_lower['tenant'] ~ '_cidr') }}
+              routes: {{ lookup('vars', networks_lower['tenant'] ~ '_host_routes') }}
+            - type: vlan
+              vlan_id: {{ lookup('vars', networks_lower['external'] ~ '_vlan_id') }}
+              mtu: {{ lookup('vars', networks_lower['external'] ~ '_mtu') }}
+              device: bond_data
+              addresses:
+              - ip_netmask:
+                  {{ lookup('vars', networks_lower['external'] ~ '_ip') }}/{{ lookup('vars', networks_lower['external'] ~ '_cidr') }}
+              routes: {{ lookup('vars', networks_lower['external'] ~ '_host_routes') }}
+  nodes:
+    edpm-compute-0:
+      hostName: edpm-compute-0
+      networks:
+      - name: ctlplane
+        subnetName: subnet1
+        defaultRoute: true
+        fixedIP: 172.22.0.110
+      - name: internalapi
+        subnetName: subnet1
+        fixedIP: 172.17.0.229
+      - name: storage
+        subnetName: subnet1
+        fixedIP: 172.18.0.91
+      - name: tenant
+        subnetName: subnet1
+        fixedIP: 172.19.0.71
+      - name: external
+        subnetName: subnet1
+        fixedIP: 10.0.0.80
+      ansible:
+        ansibleHost: 172.22.0.110
+        ansibleUser: kni
+        ansibleVars:
+          fqdn_internal_api: edpm-compute-0.ecintelligence.lab
+    edpm-compute-1:
+      hostName: edpm-compute-1
+      networks:
+      - name: ctlplane
+        subnetName: subnet1
+        defaultRoute: true
+        fixedIP: 172.22.0.111
+      - name: internalapi
+        subnetName: subnet1
+        fixedIP: 172.17.0.230
+      - name: storage
+        subnetName: subnet1
+        fixedIP: 172.18.0.92
+      - name: tenant
+        subnetName: subnet1
+        fixedIP: 172.19.0.72
+      - name: external
+        subnetName: subnet1
+        fixedIP: 10.0.0.81
+      ansible:
+        ansibleHost: 172.22.0.111
+        ansibleUser: kni
+        ansibleVars:
+          fqdn_internal_api: edpm-compute-1.ecintelligence.lab
