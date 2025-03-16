@@ -1,0 +1,56 @@
+apiVersion: network.openstack.org/v1beta1
+kind: NetConfig
+metadata:
+  name: openstacknetconfig
+  namespace: openstack
+spec:
+  networks:
+  - name: CtlPlane
+    dnsDomain: ctlplane.ecintelligence.lab
+    subnets:
+    - name: subnet1
+      allocationRanges:
+      - end: 172.22.0.120
+        start: 172.22.0.110
+      cidr: 172.22.0.0/24
+      gateway: 172.22.0.5
+  - name: InternalApi
+    dnsDomain: internalapi.ecintelligence.lab
+    subnets:
+    - name: subnet1
+      allocationRanges:
+      - end: 172.17.0.250
+        start: 172.17.0.100
+      excludeAddresses:
+      - 172.17.0.10
+      - 172.17.0.12
+      cidr: 172.17.0.0/24
+      vlan: 20
+  - name: External
+    dnsDomain: external.ecintelligence.lab
+    subnets:
+    - name: subnet1
+      allocationRanges:
+      - end: 10.0.0.90
+        start: 10.0.0.80
+      cidr: 10.0.0.0/24
+      gateway: 10.0.0.2
+      vlan: 100
+  - name: Storage
+    dnsDomain: storage.ecintelligence.lab
+    subnets:
+    - name: subnet1
+      allocationRanges:
+      - end: 172.18.0.250
+        start: 172.18.0.100
+      cidr: 172.18.0.0/24
+      vlan: 21
+  - name: Tenant
+    dnsDomain: tenant.ecintelligence.lab
+    subnets:
+    - name: subnet1
+      allocationRanges:
+      - end: 172.19.0.250
+        start: 172.19.0.100
+      cidr: 172.19.0.0/24
+      vlan: 22
