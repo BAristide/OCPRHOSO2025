@@ -1,0 +1,20 @@
+
+Deploy two worker nodes: 
+sudo virt-install -n comp01.ecintelligence.lab \
+--description "Red hat compute 1" \
+--ram=32768 \
+--vcpus=16 \
+--os-type=Linux \
+--os-variant=rhl9 \
+--noreboot \
+--disk pool=default,bus=virtio,size=150 \
+--graphics none \
+--serial pty \
+--pxe \
+--network bridge=provisionnet,mac=52:54:00:0a:6e:01 \
+--network bridge=baremetal,mac=52:54:00:8c:51:1b,virtualport_type=openvswitch,model=virtio,driver.name=vhost \
+--network bridge=baremetal,mac=52:54:00:27:31:29,virtualport_type=openvswitch,model=virtio,driver.name=vhost \
+--network bridge=isolated01,mac=52:54:00:3f:07:dd,virtualport_type=openvswitch,model=virtio,driver.name=vhost \
+--network bridge=isolated01,mac=52:54:00:3d:29:6b,virtualport_type=openvswitch,model=virtio,driver.name=vhost \
+--graphics vnc,listen=0.0.0.0,port=60078,keymap=fr \
+--noautoconsole
