@@ -1,0 +1,70 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+ name: edpm-compute-01-network-config-secret
+ namespace: openstack
+type: Opaque
+stringData:
+ nmstate: |
+  interfaces:
+  - name: bond0
+    type: bond
+    state: up
+    link-aggregation:
+      mode: active-backup
+      options:
+        miimon: '100'
+      port:
+      - ens4
+      - ens5
+  - name: vlan100
+    type: vlan
+    state: up
+    vlan:
+      id: 100
+      base-iface: bond0
+    ipv4:
+      address:
+      - ip: 10.0.0.65
+        prefix-length: 24
+      enabled: true
+  dns-resolver:
+    config:
+      server:
+      - 10.0.0.2
+  routes:
+    config:
+    - destination: 0.0.0.0/0
+      next-hop-address: 10.0.0.2
+      next-hop-interface: vlan100
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: edpm-compute-01-bmc-secret
+  namespace: openstack
+type: Opaque
+data:
+  username: c2VjcmV0
+  password: c2VjcmV0
+---
+apiVersion: metal3.io/v1alpha1
+kind: BareMetalHost
+metadata:
+  name: edpm-compute-0
+  namespace: openstack
+  labels:
+    app: openstack
+    workload: compute
+spec:
+  online: True
+  bootMACAddress: 52:54:00:1d:bc:0d
+  bmc:
+    address: ipmi://10.10.0.1:6100
+    credentialsName: edpm-compute-01-bmc-secret
+    username: secret
+    password: secret
+  rootDeviceHints:
+    deviceName: /dev/vda
+  preprovisioningNetworkDataName: edpm-compute-01-network-config-secret
