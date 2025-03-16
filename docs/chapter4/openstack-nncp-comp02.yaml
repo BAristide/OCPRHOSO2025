@@ -1,0 +1,71 @@
+apiVersion: nmstate.io/v1
+kind: NodeNetworkConfigurationPolicy
+metadata:
+  name: osp-bond0-worker-2
+spec:
+  desiredState:
+    interfaces:
+    - description: Configuring bond1
+      ipv4:    
+        dhcp: false
+        enabled: true
+        address: []
+      name: bond1
+      state: up
+      type: bond
+      link-aggregation:
+        mode: active-backup
+        port:
+        - ens6
+        - ens7
+    - description: internalapi vlan interface
+      ipv4:
+        address:
+        - ip: 172.17.0.11
+          prefix-length: 24
+        enabled: true
+        dhcp: false
+      ipv6:
+        enabled: false
+      name: internalapi
+      state: up
+      type: vlan
+      vlan:
+        base-iface: bond1
+        id: 20
+        reorder-headers: true
+    - description: storage vlan interface
+      ipv4:
+        address:
+        - ip: 172.18.0.11
+          prefix-length: 24
+        enabled: true
+        dhcp: false
+      ipv6:
+        enabled: false
+      name: storage
+      state: up
+      type: vlan
+      vlan:
+        base-iface: bond1
+        id: 21
+        reorder-headers: true
+    - description: tenant vlan interface
+      ipv4:
+        address:
+        - ip: 172.19.0.11
+          prefix-length: 24
+        enabled: true
+        dhcp: false
+      ipv6:
+        enabled: false
+      name: tenant
+      state: up
+      type: vlan
+      vlan:
+        base-iface: bond0
+        id: 22
+        reorder-headers: true
+  nodeSelector:
+    kubernetes.io/hostname: comp02.ocp4.ecintelligence.lab
+    node-role.kubernetes.io/worker: ""
